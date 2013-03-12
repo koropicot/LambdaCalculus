@@ -24,17 +24,28 @@ namespace LambdaInterpreter
             from _ in WhiteSpace.More1()
             select (object)null;
 
-        // ['0','9']/['a','z']/['A','Z']/'_'
+        // ['0','9']
+        static Parser<char, char> Numeral =
+            Parser.CharRange('0', '9');
+
+        // Numeral+
+        static Parser<char, Term> Number =
+            from num in Numeral.More1()
+            select TermEx.Number(int.Parse(string.Concat(num)));
+
+        // ['a','z']/['A','Z']/'_'
         static Parser<char, char> IdentifierChar =
-            Parser.CharRange('0', '9').Or(
             Parser.CharRange('a', 'z').Or(
             Parser.CharRange('A', 'Z').Or(
-            Parser.Terminal('_'))));
+            Parser.Terminal('_')));
 
-        // IdentifierChar+
+        // IdentifierChar (IdentifierChar/Numeral)*
         static Parser<char, Var> Variable =
-            from ident in IdentifierChar.More1()
-            select new Var(string.Concat(ident));
+            from head in IdentifierChar
+            from tail in 
+                IdentifierChar.Or(
+                Numeral).More0()
+            select new Var(string.Concat(head.AddTail(tail)));
 
         // ('λ'/'^') Separator? Variable (Separator Variable)* Separator? '.'  M
         static Parser<char, Abs> Abstract = ParserEx.Init(() =>
@@ -77,8 +88,11 @@ namespace LambdaInterpreter
             from __ in Separator.Optional()
             select term);
 
-        // Variable/( '(' M ')' )
-        static Parser<char, Term> Atom =(  
+        // Number/Variable/( '(' M ')' )
+        static Parser<char, Term> Atom =(
+                from num in Number
+                select num)
+            .Or(
                 from v in Variable
                 select (Term)v)
             .Or(
@@ -90,7 +104,7 @@ namespace LambdaInterpreter
 
         static void Main(string[] args)
         {
-            var input = "(^x y.y x) y";
+            var input = "(λm n f x. m f (n f x)) 2 3";
             Console.WriteLine("Input:" + input);
             var output = M(input.ToConsList()).Match(
                 Some: a => new { success = true, result = a },
@@ -98,17 +112,20 @@ namespace LambdaInterpreter
             Console.WriteLine(output.success ? "Success" : "Failure"); 
             Console.WriteLine("Rest:"+string.Concat(output.result.ResidualSource));
             Console.WriteLine("Parsed:"+output.result.Return);
-            var ret = output.result.Return;
-            Console.WriteLine("FreeVars:" + string.Concat(ret.FreeVars));
+            if (output.success)
+            {
+                var ret = output.result.Return;
+                Console.WriteLine("FreeVars:" + string.Concat(ret.FreeVars));
 
-            var steps = Ex.Unfold(ret, step => step.BetaReduct().Match(
-                    Some: a => Option.Some(Tuple.Create(a,a)),
-                    None: () => Option.None<Tuple<Term, Term>>()));
-            steps
-                .Select((term, i) => string.Format("Step{0}:{1}", i + 1, term))
-                .ForEach(result => Console.WriteLine(result));
-            Console.WriteLine("End of Step");
-            Console.WriteLine("Result:{0}", steps.Last());
+                var steps = ret.AddTail(Ex.Unfold(ret, step => step.BetaReduct().Match(
+                        Some: a => Option.Some(Tuple.Create(a, a)),
+                        None: () => Option.None<Tuple<Term, Term>>())));
+                steps
+                    .Select((term, i) => string.Format("Step{0}:{1}", i, term))
+                    .ForEach(result => Console.WriteLine(result));
+                Console.WriteLine("End of Step");
+                Console.WriteLine("Result:{0}", steps.Last());
+            }
 
             Console.Read();
         }

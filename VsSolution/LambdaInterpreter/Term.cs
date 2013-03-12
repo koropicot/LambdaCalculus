@@ -160,4 +160,20 @@ namespace LambdaInterpreter
                 Abs: (p, M) => Option.Some<Term>(M.Substitute(p, Right))); //β簡約
         }
     }
+
+    static class TermEx
+    {
+        public static Term Number(int i)
+        {
+            var f = new Var("f");
+            var x = new Var("x");
+            return new Abs(f, new Abs(x, RepeatApp(i, f, x)));
+        }
+        private static Term RepeatApp(int i, Term f, Term M)
+        {
+            return i == 0
+                ? M
+                : new App(f, RepeatApp(i-1,f,M));
+        }
+    }
 }
