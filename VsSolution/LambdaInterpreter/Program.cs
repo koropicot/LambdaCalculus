@@ -11,7 +11,11 @@ namespace LambdaInterpreter
     {
         #region lambda
         static Parser<char,object> WhiteSpace = 
-            from _ in Parser.Terminal(' ').Or(Parser.Terminal('\n')).Or(Parser.Terminal('\r'))
+            from _ in 
+                Parser.Terminal(' ').Or(
+                Parser.Terminal('\n').Or(
+                Parser.Terminal('\r').Or(
+                Parser.Terminal('\t'))))
             select (object)null;
 
         static Parser<char,object> Separator = 
@@ -29,29 +33,33 @@ namespace LambdaInterpreter
             select new Var(string.Concat(ident));
 
         static Parser<char, Abs> Abstract = ParserEx.Init(() =>
-            from _0 in Parser.Terminal('λ').Or(Parser.Terminal('^'))
-            from _1 in Separator.Optional()
-            from paras in
-                (
-                    from head in Variable
-                    from tail in
-                        (
-                            from _ in Separator
-                            from v in Variable
-                            select v).More0()
-                    select head.AddTail(tail))
-            from _2 in Separator.Optional()
-            from _3 in Parser.Terminal('.')
-            from _4 in Separator.Optional()
+            from _0 in 
+                (Parser.Terminal('λ').Or(Parser.Terminal('^'))).Seq(
+                Separator.Optional())
+            from paras in (
+                from head in Variable
+                from tail in
+                    (
+                        from _ in Separator
+                        from v in Variable
+                        select v
+                    ).More0()
+                select head.AddTail(tail))
+            from _1 in 
+                Separator.Optional().Seq(
+                Parser.Terminal('.').Seq(
+                Separator.Optional()))
             from term in M
             select Abs.VarsAbs(paras, term));
         
         static Parser<char,App> Application = ParserEx.Init(()=>
             from head in Atom
-            from tail in (
-                from _ in Separator
-                from e in Atom
-                select e).More1()
+            from tail in 
+                (
+                    from _ in Separator
+                    from e in Atom
+                    select e
+                ).More1()
             select App.Apps(head.AddTail(tail)));
 
         static Parser<char, Term> M = ParserEx.Init(() =>

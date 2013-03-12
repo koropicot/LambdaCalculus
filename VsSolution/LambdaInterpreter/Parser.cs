@@ -99,7 +99,9 @@ namespace LambdaInterpreter
 
         public static Parser<T, TReturn> Or<T, TReturn>(this IEnumerable<Parser<T, TReturn>> parsers)
         {
-            return parsers.First().Or(parsers.Skip(1).Or());
+            return parsers.Skip(1).Any()
+                ? parsers.First().Or(parsers.Skip(1).Or())
+                : parsers.First();
         }
 
         public static Parser<T, TReturn> Optional<T, TReturn>(this Parser<T, TReturn> parser)
@@ -146,7 +148,9 @@ namespace LambdaInterpreter
 
         public static Parser<T, TReturn> Seq<T, TReturn>(this IEnumerable<Parser<T, TReturn>> parsers)
         {
-            return parsers.First().Seq(parsers.Skip(1).Seq());
+            return parsers.Skip(1).Any()
+                ? parsers.First().Seq(parsers.Skip(1).Seq())
+                : parsers.First();
         }
 
         public static Parser<T, TReturn> Return<T, TReturn>(this TReturn ret)
