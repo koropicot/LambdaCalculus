@@ -93,9 +93,9 @@ namespace LambdaInterpreter
             return var.Equals(Param)
                 ? this //このλ抽象に代入先と同じ変数が束縛されているので代入不能
                 : (!subs.FreeVars.Contains(Param) //代入する項の自由変数が仮引数とかぶるとおかしな束縛が起きる
-                    ? new Abs(Param,Term.Substitute(var,subs)) //かぶってないので項の代入で良い
-                    : Ex.Unfold(var.Identifier,ident => Option.Some(Tuple.Create(new Var(ident+"'"),ident+"'")))
-                        .First(ident => ! (Term.FreeVars.Union(subs.FreeVars).Contains(ident)))
+                    ? new Abs(Param,Term.Substitute(var,subs)) //かぶってないので項へ代入して良い
+                    : Ex.Unfold(var.Identifier,ident => Option.Some(Tuple.Create(new Var(ident+"'"),ident+"'"))) //仮引数とかぶってる
+                        .First(ident => ! (Term.FreeVars.Union(subs.FreeVars).Contains(ident))) //λ抽象の項と、代入する項の自由変数にかぶらない新しい変数を作る
                         .Apply(newParam => new Abs(newParam,Term.Substitute(Param,newParam).Substitute(var,subs))));
         }
 
@@ -157,7 +157,7 @@ namespace LambdaInterpreter
             return Left.Match(
                 Var: _ => noneBetaRedex(),
                 App: (_, __) => noneBetaRedex(),
-                Abs: (p, M) => Option.Some<Term>(M.Substitute(p, Right))); 
+                Abs: (p, M) => Option.Some<Term>(M.Substitute(p, Right))); //β簡約
         }
     }
 }

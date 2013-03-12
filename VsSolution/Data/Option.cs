@@ -33,23 +33,4 @@ namespace Data
         public static Option<T> Some<T>(T value) { return Option<T>.NewSome(value); }
         public static Option<T> None<T>() { return Option<T>.NewNone(); }
     }
-    //public class Some<T> : Option<T>
-    //{
-    //    public T Value { get; private set; }
-    //    public Some(T value)
-    //    {
-    //        Value = value;
-    //    }
-    //    public override string ToString()
-    //    {
-    //        return string.Format("Some{{{0}}}", Value);
-    //    }
-    //}
-    //public class None<T> : Option<T> 
-    //{
-    //    public override string ToString()
-    //    {
-    //        return "None";
-    //    }
-    //}
 }

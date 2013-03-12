@@ -25,7 +25,6 @@ namespace LambdaInterpreter
     }
 
     public delegate Option<Result<T,TReturn>> Parser<T, TReturn>(ConsList<T> source);
-    //public delegate Result<char,TReturn> StringParser<TReturn>(ConsList<char> source);
 
     public static class Parser
     {

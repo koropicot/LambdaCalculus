@@ -28,17 +28,6 @@ namespace Data
             return func(arg);
         }
 
-        public static IEnumerable<T> Generate<T, TState>(TState seed, Func<TState, Tuple<T, TState>> func)
-        {
-            var state = seed;
-            while (true)
-            {
-                var ret = func(state);
-                yield return ret.Item1;
-                state = ret.Item2;
-            }
-        }
-
         public static IEnumerable<T> Unfold<T,TState>(TState seed,Func<TState,Option<Tuple<T,TState>>> func)
         {
             var state = seed;
