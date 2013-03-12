@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-//using System.Collections.Generic;
-//using System.Text;
 using Data;
 
 namespace LambdaInterpreter
@@ -24,7 +22,7 @@ namespace LambdaInterpreter
             from _ in WhiteSpace.More1()
             select (object)null;
 
-        // ['0','9']
+        // [0-9]
         static Parser<char, char> Numeral =
             Parser.CharRange('0', '9');
 
@@ -33,7 +31,7 @@ namespace LambdaInterpreter
             from num in Numeral.More1()
             select TermEx.Number(int.Parse(string.Concat(num)));
 
-        // ['a','z']/['A','Z']/'_'
+        // [a-z]/[A-Z]/'_'
         static Parser<char, char> IdentifierChar =
             Parser.CharRange('a', 'z').Or(
             Parser.CharRange('A', 'Z').Or(
