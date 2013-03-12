@@ -9,7 +9,7 @@ namespace LambdaInterpreter
     abstract class Term
     {
         public abstract T Match<T>(Func<string, T> Var, Func<Var, Term, T> Abs, Func<Term, Term, T> App);
-        public abstract IEnumerable<Var> FreeVars{get; }
+        public IEnumerable<Var> FreeVars { get; protected set; }
         public abstract Term Substitute(Var var, Term subs);
         public abstract Option<Term> BetaReduct();
     }
@@ -20,6 +20,7 @@ namespace LambdaInterpreter
         public Var(string ident)
         {
             Identifier = ident;
+            FreeVars = Enumerable.Repeat(this, 1);
         }
         public override int GetHashCode()
         {
@@ -42,10 +43,7 @@ namespace LambdaInterpreter
         {
             return Var(Identifier);
         }
-        public override IEnumerable<Var> FreeVars
-        {
-            get { return Enumerable.Repeat(this, 1); }
-        }
+
         public override Term Substitute(Var var, Term subs)
         {
             return this.Equals(var) ? subs : this;
@@ -65,6 +63,7 @@ namespace LambdaInterpreter
         {
             Param = param;
             Term = term;
+            FreeVars = Term.FreeVars.Where(var => !var.Equals(Param));
         }
         public override string ToString()
         {
@@ -82,10 +81,6 @@ namespace LambdaInterpreter
         public override T Match<T>(Func<string, T> Var, Func<Var, Term, T> Abs, Func<Term, Term, T> App)
         {
             return Abs(Param, Term);
-        }
-        public override IEnumerable<Var> FreeVars
-        {
-            get { return Term.FreeVars.Where(var => ! var.Equals(Param)); }
         }
 
         public override Term Substitute(Var var, Term subs)
@@ -115,6 +110,7 @@ namespace LambdaInterpreter
         {
             Left = left;
             Right = right;
+            FreeVars = Left.FreeVars.Union(Right.FreeVars); 
         }
         public override string ToString()
         {
@@ -134,10 +130,6 @@ namespace LambdaInterpreter
         public override T Match<T>(Func<string, T> Var, Func<Var, Term, T> Abs, Func<Term, Term, T> App)
         {
             return App(Left, Right);
-        }
-        public override IEnumerable<Var> FreeVars
-        {
-            get { return Left.FreeVars.Union(Right.FreeVars); }
         }
 
         public override Term Substitute(Var var, Term subs)
