@@ -10,6 +10,7 @@ namespace LambdaInterpreter
     class Program
     {
         #region lambda
+        // ' '/'\n'/'\r'/'\t'
         static Parser<char,object> WhiteSpace = 
             from _ in 
                 Parser.Terminal(' ').Or(
@@ -18,20 +19,24 @@ namespace LambdaInterpreter
                 Parser.Terminal('\t'))))
             select (object)null;
 
+        // WhiteSpace+
         static Parser<char,object> Separator = 
             from _ in WhiteSpace.More1()
             select (object)null;
 
+        // ['0','9']/['a','z']/['A','Z']/'_'
         static Parser<char, char> IdentifierChar =
             Parser.CharRange('0', '9').Or(
             Parser.CharRange('a', 'z').Or(
             Parser.CharRange('A', 'Z').Or(
             Parser.Terminal('_'))));
 
+        // IdentifierChar+
         static Parser<char, Var> Variable =
             from ident in IdentifierChar.More1()
             select new Var(string.Concat(ident));
 
+        // ('λ'/'^') Separator? Variable (Separator Variable)* Separator? '.'  M
         static Parser<char, Abs> Abstract = ParserEx.Init(() =>
             from _0 in 
                 (Parser.Terminal('λ').Or(Parser.Terminal('^'))).Seq(
@@ -47,11 +52,11 @@ namespace LambdaInterpreter
                 select head.AddTail(tail))
             from _1 in 
                 Separator.Optional().Seq(
-                Parser.Terminal('.').Seq(
-                Separator.Optional()))
+                Parser.Terminal('.'))
             from term in M
             select Abs.VarsAbs(paras, term));
         
+        // Atom (Separator Atom)+
         static Parser<char,App> Application = ParserEx.Init(()=>
             from head in Atom
             from tail in 
@@ -62,6 +67,7 @@ namespace LambdaInterpreter
                 ).More1()
             select App.Apps(head.AddTail(tail)));
 
+        // Separator? (Application/Abstract/Atom) Separator?
         static Parser<char, Term> M = ParserEx.Init(() =>
             from _ in Separator.Optional()
             from term in (
@@ -71,6 +77,7 @@ namespace LambdaInterpreter
             from __ in Separator.Optional()
             select term);
 
+        // Variable/( '(' M ')' )
         static Parser<char, Term> Atom =(  
                 from v in Variable
                 select (Term)v)
