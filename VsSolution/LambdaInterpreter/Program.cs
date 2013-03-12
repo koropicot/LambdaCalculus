@@ -29,7 +29,7 @@ let Y = λg. (λx. g (x x)) (λx. g (x x)) in
             var input = header + @"
 let g = λf n.IsZero n 1 (Mult n (f (Pred n))) in
 let fact = g (Y g) in
-fact 4
+fact 3
 ";
             Console.WriteLine("Input:{0}", input);
             var output = LambdaParser.LambdaTerm(input.ToConsList()).Match(

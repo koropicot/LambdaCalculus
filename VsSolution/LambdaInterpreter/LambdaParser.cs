@@ -66,7 +66,7 @@ namespace LambdaInterpreter
         // ('λ'/'^') Separator? Variable (Separator Variable)* Separator? '.'  M
         static Parser<char, Abs> Abstract = ParserEx.Init(() =>
             from _0 in
-                (Parser.Terminal('λ').Or(Parser.Terminal('^'))).Seq(
+                (Parser.Sequence("λ").Or(Parser.Sequence("^"))).Seq(
                 Separator.Optional())
             from paras in
                 (
@@ -80,7 +80,7 @@ namespace LambdaInterpreter
                     select head.AddTail(tail))
             from _1 in
                 Separator.Optional().Seq(
-                Parser.Terminal('.'))
+                Parser.Sequence("."))
             from term in LambdaTerm
             select Abs.VarsAbs(paras, term));
 
@@ -103,9 +103,9 @@ namespace LambdaInterpreter
                 from v in Variable
                 select (Term)v)
             .Or(
-                from _0 in Parser.Terminal('(')
+                from _0 in Parser.Sequence("(")
                 from m in LambdaTerm
-                from _1 in Parser.Terminal(')')
+                from _1 in Parser.Sequence(")")
                 select m);
 
         // "let" Separator? Variable Separator? "=" M "in" M
