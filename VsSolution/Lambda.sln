@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LambdaInterpreter", "LambdaInterpreter\LambdaInterpreter.csproj", "{84016059-9898-405D-AF0A-4A98A17FF587}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{73379045-8869-4B80-9F46-F7E3EABD80DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{84016059-9898-405D-AF0A-4A98A17FF587}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84016059-9898-405D-AF0A-4A98A17FF587}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84016059-9898-405D-AF0A-4A98A17FF587}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84016059-9898-405D-AF0A-4A98A17FF587}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73379045-8869-4B80-9F46-F7E3EABD80DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73379045-8869-4B80-9F46-F7E3EABD80DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73379045-8869-4B80-9F46-F7E3EABD80DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73379045-8869-4B80-9F46-F7E3EABD80DC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
