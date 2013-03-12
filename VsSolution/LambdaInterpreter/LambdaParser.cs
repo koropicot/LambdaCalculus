@@ -48,20 +48,20 @@ namespace LambdaInterpreter
             Parser.Sequence("=").Select(string.Concat).Or(
             Parser.Sequence("in").Select(string.Concat)));
 
-        // (!KeyWord) ([a-z]/[A-Z]/'_')
+        //  [a-z]/[A-Z]/'_'
         static Parser<char, char> IdentifierChar =
-            KeyWord.Not().Seq(
             Parser.CharRange('a', 'z').Or(
             Parser.CharRange('A', 'Z').Or(
-            Parser.Terminal('_'))));
+            Parser.Terminal('_')));
 
-        // IdentifierChar (IdentifierChar/Numeral)*
+        // (!KeyWord) (IdentifierChar (IdentifierChar/Numeral)*)
         static Parser<char, Var> Variable =
+            KeyWord.Not().Seq(
             from head in IdentifierChar
             from tail in
                 IdentifierChar.Or(
                 Numeral).More0()
-            select new Var(string.Concat(head.AddTail(tail)));
+            select new Var(string.Concat(head.AddTail(tail))));
 
         // ('λ'/'^') Separator? Variable (Separator Variable)* Separator? '.'  M
         static Parser<char, Abs> Abstract = ParserEx.Init(() =>

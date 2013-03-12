@@ -19,8 +19,8 @@ let Or = λp q. p True q in
 let Not = λp. p False True in
 let IsZero = λn. n (λx. False) True in
 let Cons = λs b f. f s b in
-let fst = λp. p True in
-let snd = λp. p False in
+let Fst = λp. p True in
+let Snd = λp. p False in
 let Y = λg. (λx. g (x x)) (λx. g (x x)) in
 ";
 
