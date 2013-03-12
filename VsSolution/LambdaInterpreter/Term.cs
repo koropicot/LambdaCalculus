@@ -167,5 +167,12 @@ namespace LambdaInterpreter
                 ? M
                 : new App(f, RepeatApp(i-1,f,M));
         }
+
+        public static IEnumerable<Term> BetaReductionSteps(Term start)
+        {
+            return start.AddTail(Ex.Unfold(start, step => step.BetaReduct().Match(
+                        Some: a => Option.Some(Tuple.Create(a, a)),
+                        None: () => Option.None<Tuple<Term, Term>>())));
+        }
     }
 }
