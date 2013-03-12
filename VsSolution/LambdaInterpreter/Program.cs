@@ -31,11 +31,18 @@ namespace LambdaInterpreter
             from num in Numeral.More1()
             select TermEx.Number(int.Parse(string.Concat(num)));
 
+        // "let"/"="/"in"
+        static Parser<char, string> KeyWord =
+            Parser.Sequence("let").Select(string.Concat).Or(
+            Parser.Sequence("=").Select(string.Concat).Or(
+            Parser.Sequence("in").Select(string.Concat)));
+
         // [a-z]/[A-Z]/'_'
         static Parser<char, char> IdentifierChar =
+            KeyWord.Not().Seq(
             Parser.CharRange('a', 'z').Or(
             Parser.CharRange('A', 'Z').Or(
-            Parser.Terminal('_')));
+            Parser.Terminal('_'))));
 
         // IdentifierChar (IdentifierChar/Numeral)*
         static Parser<char, Var> Variable =
@@ -80,9 +87,10 @@ namespace LambdaInterpreter
         static Parser<char, Term> M = ParserEx.Init(() =>
             from _ in Separator.Optional()
             from term in (
+                Let.Or(
                 Application.Select(app => (Term)app).Or(
                 Abstract.Select(abs => (Term)abs)).Or(
-                Atom.Select(var => (Term)var)))
+                Atom.Select(var => (Term)var))))
             from __ in Separator.Optional()
             select term);
 
@@ -98,11 +106,23 @@ namespace LambdaInterpreter
                 from m in M
                 from _1 in Parser.Terminal(')')
                 select m);
+
+        static Parser<char, Term> Let =
+            from _let in Parser.Sequence("let").Seq(Separator.Optional())
+            from var in Variable
+            from _equal in Separator.Optional().Seq(Parser.Sequence("=").Seq(Separator.Optional()))
+            from m in M
+            from _in in Separator.Optional().Seq(Parser.Sequence("in").Seq(Separator.Optional()))
+            from n in M
+            select (Term)new App(new Abs(var, n), m);
         #endregion
 
         static void Main(string[] args)
         {
-            var input = "(λm n f x. m f (n f x)) 2 3";
+            var input = 
+                "let plus = λm n f x. m f (n f x) in\n"+
+                "let plus2 = plus 2 in\n"+
+                "plus2 3";
             Console.WriteLine("Input:" + input);
             var output = M(input.ToConsList()).Match(
                 Some: a => new { success = true, result = a },

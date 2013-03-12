@@ -56,9 +56,12 @@ namespace LambdaInterpreter
             where T : IEquatable<T>
         {
             return
-                from head in Parser.Terminal(seq.First())
-                from tail in Sequence(seq.Skip(1))
-                select head.AddTail(tail);
+                seq.Any()
+                    ? (from head in Parser.Terminal(seq.First())
+                       from tail in Sequence(seq.Skip(1))
+                       select head.AddTail(tail))
+                    : Parser.NullTerminal<T>().Select(t=>Enumerable.Repeat(t,1));
+                    
         }
     }
 
@@ -97,13 +100,6 @@ namespace LambdaInterpreter
                             None: () => Option.None<Result<T,TReturn>>()))));
         }
 
-        public static Parser<T, TReturn> Or<T, TReturn>(this IEnumerable<Parser<T, TReturn>> parsers)
-        {
-            return parsers.Skip(1).Any()
-                ? parsers.First().Or(parsers.Skip(1).Or())
-                : parsers.First();
-        }
-
         public static Parser<T, TReturn> Optional<T, TReturn>(this Parser<T, TReturn> parser)
         {
             return
@@ -134,6 +130,20 @@ namespace LambdaInterpreter
                 select head.AddTail(tail);
         }
 
+        public static Parser<T, TReturn> And<T, TReturn>(this Parser<T, TReturn> parser)
+        {
+            return source => parser(source).Match(
+                Some: a => Option.Some(Result.New(source, a.Return)),
+                None: () => Option.None<Result<T,TReturn>>());
+        }
+
+        public static Parser<T, TReturn> Not<T, TReturn>(this Parser<T, TReturn> parser)
+        {
+            return source => parser(source).Match(
+                Some: a => Option.None<Result<T,TReturn>>(),
+                None: () => Option.Some(Result.New(source, default(TReturn))));
+        }
+
         public static Parser<T, TReturn> Bind<T, TLeft, TReturn>(this Parser<T, TLeft> parser, Func<TLeft, Parser<T, TReturn>> func)
         {
             return source => parser(source).Match(
@@ -144,13 +154,6 @@ namespace LambdaInterpreter
         public static Parser<T, TReturn> Seq<T, TLeft, TReturn>(this Parser<T, TLeft> left, Parser<T, TReturn> right)
         {
             return left.Bind(_ => right);
-        }
-
-        public static Parser<T, TReturn> Seq<T, TReturn>(this IEnumerable<Parser<T, TReturn>> parsers)
-        {
-            return parsers.Skip(1).Any()
-                ? parsers.First().Seq(parsers.Skip(1).Seq())
-                : parsers.First();
         }
 
         public static Parser<T, TReturn> Return<T, TReturn>(this TReturn ret)
