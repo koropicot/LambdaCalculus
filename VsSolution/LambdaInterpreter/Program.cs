@@ -37,7 +37,7 @@ namespace LambdaInterpreter
             Parser.Sequence("=").Select(string.Concat).Or(
             Parser.Sequence("in").Select(string.Concat)));
 
-        // [a-z]/[A-Z]/'_'
+        // (!KeyWord) ([a-z]/[A-Z]/'_')
         static Parser<char, char> IdentifierChar =
             KeyWord.Not().Seq(
             Parser.CharRange('a', 'z').Or(
@@ -107,12 +107,13 @@ namespace LambdaInterpreter
                 from _1 in Parser.Terminal(')')
                 select m);
 
+        // "let" Separator? Variable Separator? "=" M "in" M
         static Parser<char, Term> Let =
             from _let in Parser.Sequence("let").Seq(Separator.Optional())
             from var in Variable
-            from _equal in Separator.Optional().Seq(Parser.Sequence("=").Seq(Separator.Optional()))
+            from _equal in Separator.Optional().Seq(Parser.Sequence("="))
             from m in M
-            from _in in Separator.Optional().Seq(Parser.Sequence("in").Seq(Separator.Optional()))
+            from _in in Parser.Sequence("in")
             from n in M
             select (Term)new App(new Abs(var, n), m);
         #endregion
