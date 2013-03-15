@@ -84,7 +84,7 @@ namespace LambdaInterpreter
             from term in LambdaTerm
             select Abs.VarsAbs(paras, term));
 
-        // Atom Atom+
+        // Atom (Separator? Atom)+
         static Parser<char, App> Application = ParserEx.Init(() =>
             from head in Atom
             from tail in
